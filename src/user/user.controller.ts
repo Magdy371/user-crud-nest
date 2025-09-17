@@ -5,13 +5,13 @@ import { CreateUser } from './dto/create-user.dto';
 import { UpdateUser } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { ParseIntPipe } from '@nestjs/common';
-//import { AuthGuard } from '../common/guards/auth.guard';
-
+import { Role } from '../common/guards/roles.decrator'
 @Controller('users') // plural is conventional
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @Role('Admin')
   async create(@Body() data: CreateUser): Promise<User> {
     return this.userService.create(data);
   }

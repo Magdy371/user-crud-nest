@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
-import {Controller, Get, Post, Put, Delete, Param, Body, UseGuards} from '@nestjs/common';
+import {Controller, Get, Post, Put, Delete, Param, Body} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUser } from './dto/create-user.dto';
 import { UpdateUser } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { ParseIntPipe } from '@nestjs/common';
-import { AuthGuard } from '../common/guards/auth.guard';
+//import { AuthGuard } from '../common/guards/auth.guard';
 
 @Controller('users') // plural is conventional
 export class UserController {
@@ -16,7 +16,8 @@ export class UserController {
     return this.userService.create(data);
   }
 
-  @UseGuards(new AuthGuard)
+  //@UseGuards(new AuthGuard)
+  //we will use guard on user Modules insted to be applied on the controllers of user Modules
   @Get()
   async findAll(): Promise<User[]> {
     return this.userService.findAll();

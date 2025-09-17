@@ -3,7 +3,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import {GlobalExceptionFilter} from '../src/common/filters/all-exceptions.filter';
+import {GlobalExceptionFilter} from './common/filters/all-exceptions.filter';
 
 
 async function bootstrap() {

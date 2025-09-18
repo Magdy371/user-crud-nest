@@ -5,14 +5,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { CreateUser } from './dto/create-user.dto';
 import { UpdateUser } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
-
-  async create(data: CreateUser): Promise<User> {
-    return this.prisma.user.create({ data });
-  }
 
   async findAll(): Promise<User[]> {
     return this.prisma.user.findMany();
@@ -26,9 +23,19 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, data: UpdateUser): Promise<User> {
+  async update(id: number, dto: UpdateUser): Promise<User> {
   try {
-    return await this.prisma.user.update({ where: { id }, data });
+    const user = await this.prisma.user.findUnique({where: {id},});
+    if(!user){
+      throw new NotFoundException('User not found');
+    }
+    const hashedPassword = dto.password ? await bcrypt.hash(dto.password, 10) : user.password;
+    return await this.prisma.user.update({ where: { id }, data :{
+        name: dto.name ?? user.name,
+        email: dto.email ?? user.email,
+        role: dto.role ?? user.role,
+        password: hashedPassword,
+      }});
   } catch {
     throw new NotFoundException(`User with id ${id} not found`);
   }

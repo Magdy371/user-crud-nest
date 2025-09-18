@@ -12,6 +12,9 @@ export class UpdateUser {
   role?: UserRole;
 
   @IsOptional()
+  password?: string;
+
+  @IsOptional()
   @IsEmail()
   email?: string;
 }

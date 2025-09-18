@@ -1,20 +1,17 @@
 /* eslint-disable prettier/prettier */
-import {Controller, Get, Post, Put, Delete, Param, Body} from '@nestjs/common';
+import {Controller, Get, Post, Put, Delete, Param, Body, UseGuards} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUser } from './dto/create-user.dto';
 import { UpdateUser } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { ParseIntPipe } from '@nestjs/common';
-import { Role } from '../common/guards/roles.decrator'
-@Controller('users') // plural is conventional
+import { Role, UserOnly, AdminOnley } from '../common/guards/decorators/roles.decrator'
+import { RolesGuard } from '../common/guards/roles.guard';
+
+@Controller('users')
+@UseGuards(RolesGuard) // Apply roles guard to all routes in this controller// plural is conventional
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Post()
-  @Role('Admin')
-  async create(@Body() data: CreateUser): Promise<User> {
-    return this.userService.create(data);
-  }
 
   //@UseGuards(new AuthGuard)
   //we will use guard on user Modules insted to be applied on the controllers of user Modules
@@ -29,12 +26,20 @@ export class UserController {
   }
 
   @Put(':id')
+  @Role('Admin')
   async update(@Param('id',ParseIntPipe) id: number, @Body() data: UpdateUser): Promise<User> {
     return this.userService.update(id, data);
   }
 
   @Delete(':id')
+  @Role('Admin')
   async delete(@Param('id',ParseIntPipe) id: number): Promise<User> {
     return this.userService.remove(+id);
+  }
+
+  @Get('Profile/:id')
+  @UserOnly()
+  async getProfile(@Param('id', ParseIntPipe) id: number){
+    return this.userService.findOne(id);
   }
 }

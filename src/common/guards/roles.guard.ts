@@ -1,23 +1,28 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable prettier/prettier,@typescript-eslint/no-unsafe-assignment */
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role } from './decorators/roles.decrator';
+import { Roles } from './decorators/auth.decorators';
 import { UserRole } from '@prisma/client';
+import { AuthGuard } from './auth.guard';
 
+
+//forwardRef to prevent Circular DI issue
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector,
+              @Inject(forwardRef(()=>AuthGuard))private authGuard: AuthGuard,) {}
 
-  canActivate(context: ExecutionContext): boolean {
-    // Get the required role from the decorator
-    const requiredRole = this.reflector.get(Role, context.getHandler());
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+   const requiredRole = this.reflector.getAllAndOverride<UserRole[] | undefined>(Roles,[context.getHandler(),context.getClass()])
 
     // If no role is required, allow access
-    if (!requiredRole) {
+    if (!requiredRole || requiredRole.length === 0 ) {
       return true;
     }
 
+    //To superpass Guard order we use explicit calling
+    await this.authGuard.canActivate(context);
     // Get the request object
     const request = context.switchToHttp().getRequest();
     const user = request.user; // This should be set by your AuthGuard
@@ -25,11 +30,6 @@ export class RolesGuard implements CanActivate {
     // Check if user exists (should be authenticated)
     if (!user) {
       throw new ForbiddenException('User not authenticated');
-    }
-
-    // Check if user has the required role
-    if (user.role !== requiredRole) {
-      throw new ForbiddenException(`Access denied. Required role: ${requiredRole}, User role: ${user.role}`);
     }
 
     const rolesToCheck = Array.isArray(requiredRole) ? requiredRole : [requiredRole];

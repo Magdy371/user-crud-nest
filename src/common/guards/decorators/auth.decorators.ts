@@ -1,9 +1,12 @@
-import {  Reflector } from '@nestjs/core';
+import { SetMetadata } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 
-export const Public = Reflector.createDecorator<boolean>();
-export const Roles = Reflector.createDecorator<UserRole[]>();
+export const IS_PUBLIC_KEY = 'isPublic';
+export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
-//ConvenientHelper
-export const AdminOnly = ()=>Roles[UserRole.Admin];
-export const UserOnly = ()=> Roles[UserRole.User];
+export const ROLES_KEY = 'roles';
+export const Roles = (...roles: UserRole[]) => SetMetadata(ROLES_KEY, roles);
+
+// Convenience helpers
+export const AdminOnly = () => Roles(UserRole.Admin);
+export const UserOnly = () => Roles(UserRole.User);

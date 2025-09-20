@@ -3,8 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
 import { User } from '@prisma/client';
-import { Public } from './decorators/auth.decorators'
 import { Reflector} from '@nestjs/core';
+import { IS_PUBLIC_KEY } from './decorators/auth.decorators';
 // Extend Request interface to include user
 declare module 'express' {
   interface Request {
@@ -19,10 +19,10 @@ export class AuthGuard implements CanActivate {
   async canActivate(context:ExecutionContext): Promise<boolean> {
     /**
      * //This One is Used Only for Handler not class
-     *     const isPublic = this.reflector.get(Public, context.getHandler());
+     *     const isPublic = this.reflector.get(IS_PUBLIC_KEY, context.getHandler());
      * */
     //This One for a Handler level 'Method()' or Class Level
-    const isPublic = this.reflector.getAllAndOverride(Public,[context.getHandler(),context.getClass()]);
+    const isPublic = this.reflector.getAllAndOverride(IS_PUBLIC_KEY,[context.getHandler(),context.getClass()]);
     if (isPublic) {
       return true; // If the route is public, bypass the guard
     }
@@ -54,14 +54,13 @@ export class AuthGuard implements CanActivate {
     }
   }
 
-  private extractTokenFromHeader (request:Request):string | undefined{
-    const authHeaders = request.headers.authorization;
-    if(!authHeaders){
-      return undefined
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return undefined;
     }
-    const [type, token] =authHeaders.split(' ');
-    if(type !== 'Bearer' || !token){
-      return token;
-    }
+
+    const [type, token] = authHeader.split(' ');
+    return type === 'Bearer' ? token : undefined;
   }
 }

@@ -5,6 +5,8 @@ import { AuthResponse } from './DTOs/authResponse.dto';
 import { User } from '@prisma/client';
 import type { RegisterDto } from './DTOs/register.dto';
 import { Public } from '../common/guards/decorators/auth.decorators'
+import { Cachable } from '../common/guards/decorators/cacheable.decorator';
+
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -21,6 +23,7 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  @Cachable()
   @Get('profile')
   async getProfile(@Request() req): Promise<User> {
     return req.user;

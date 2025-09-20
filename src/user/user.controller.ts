@@ -4,8 +4,10 @@ import { UserService } from './user.service';
 import { UpdateUser } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { ParseIntPipe } from '@nestjs/common';
-import { Roles, UserOnly, AdminOnly, Public } from '../common/guards/decorators/auth.decorators'
+import { UserOnly, AdminOnly, Public } from '../common/guards/decorators/auth.decorators'
 import { RolesGuard } from '../common/guards/roles.guard';
+import { Cachable } from '../common/guards/decorators/cacheable.decorator';
+
 
 @Controller('users')
 @UseGuards(RolesGuard) // Apply roles guard to all routes in this controller// plural is conventional
@@ -21,6 +23,7 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @UserOnly()
   @Get(':id')
   async findOne(@Param('id',ParseIntPipe) id: number): Promise<User | null> {
     return this.userService.findOne(id);
@@ -38,8 +41,10 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
+
   @Get('Profile/:id')
-  @UserOnly()
+  @Cachable()
+  @AdminOnly()
   async getProfile(@Param('id', ParseIntPipe) id: number){
     return this.userService.findOne(id);
   }

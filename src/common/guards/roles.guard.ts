@@ -5,16 +5,16 @@ import { Reflector } from '@nestjs/core';
 import { Roles } from './decorators/auth.decorators';
 import { UserRole } from '@prisma/client';
 import { AuthGuard } from './auth.guard';
+import { ROLES_KEY } from './decorators/auth.decorators'
 
 
 //forwardRef to prevent Circular DI issue
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector,
-              @Inject(forwardRef(()=>AuthGuard))private authGuard: AuthGuard,) {}
+  constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-   const requiredRole = this.reflector.getAllAndOverride<UserRole[] | undefined>(Roles,[context.getHandler(),context.getClass()])
+   const requiredRole = this.reflector.getAllAndOverride<UserRole[] | undefined>(ROLES_KEY,[context.getHandler(),context.getClass()])
 
     // If no role is required, allow access
     if (!requiredRole || requiredRole.length === 0 ) {
@@ -22,7 +22,6 @@ export class RolesGuard implements CanActivate {
     }
 
     //To superpass Guard order we use explicit calling
-    await this.authGuard.canActivate(context);
     // Get the request object
     const request = context.switchToHttp().getRequest();
     const user = request.user; // This should be set by your AuthGuard

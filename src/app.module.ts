@@ -7,11 +7,17 @@ import { AuthModule } from './auth/auth.module';
 import { GlobalExceptionFilter } from './common/filters/all-exceptions.filter';
 import { AuthGuard } from './common/guards/auth.guard';
 import { RolesGuard} from './common/guards/roles.guard';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { CacheModule } from '@nestjs/cache-manager' //to enable in memory cache
+import { HttpCacheInterceptor } from './common/Interceptors/http-cache.interceptor';
 
 @Module({
-  imports: [UserModule, PrismaModule, AuthModule, CacheModule.register()],
+  imports: [UserModule, PrismaModule, AuthModule, CacheModule.register(
+    {
+      isGlobal: true,
+      ttl: Number(process.env.CACHE_TTL_DEFAULT ?? 60),
+    }
+  )],
   providers: [
     {
       provide: APP_GUARD,
@@ -24,6 +30,10 @@ import { CacheModule } from '@nestjs/cache-manager' //to enable in memory cache
    {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter, // Global exception filter
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpCacheInterceptor,
     },
   ],
 })

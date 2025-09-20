@@ -4,7 +4,7 @@ import type { LoginDto } from './DTOs/login.dto';
 import { AuthResponse } from './DTOs/authResponse.dto';
 import { User } from '@prisma/client';
 import type { RegisterDto } from './DTOs/register.dto';
-import { Public } from '../common/guards/decorators/public.decorator'
+import { Public } from '../common/guards/decorators/auth.decorators'
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}

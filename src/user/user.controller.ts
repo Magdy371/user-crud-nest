@@ -1,11 +1,10 @@
 /* eslint-disable prettier/prettier */
 import {Controller, Get, Post, Put, Delete, Param, Body, UseGuards} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUser } from './dto/create-user.dto';
 import { UpdateUser } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { ParseIntPipe } from '@nestjs/common';
-import { Role, UserOnly, AdminOnley } from '../common/guards/decorators/roles.decrator'
+import { Roles, UserOnly, AdminOnly, Public } from '../common/guards/decorators/auth.decorators'
 import { RolesGuard } from '../common/guards/roles.guard';
 
 @Controller('users')
@@ -15,6 +14,8 @@ export class UserController {
 
   //@UseGuards(new AuthGuard)
   //we will use guard on user Modules insted to be applied on the controllers of user Modules
+
+  @Public()
   @Get()
   async findAll(): Promise<User[]> {
     return this.userService.findAll();
@@ -26,13 +27,13 @@ export class UserController {
   }
 
   @Put(':id')
-  @Role('Admin')
+  @AdminOnly()
   async update(@Param('id',ParseIntPipe) id: number, @Body() data: UpdateUser): Promise<User> {
     return this.userService.update(id, data);
   }
 
   @Delete(':id')
-  @Role('Admin')
+  @AdminOnly()
   async delete(@Param('id',ParseIntPipe) id: number): Promise<User> {
     return this.userService.remove(+id);
   }

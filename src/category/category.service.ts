@@ -27,7 +27,7 @@ export class CategoryService {
       data,
     });
     await this.cacheManager.del('GET:/categories').catch(() => {
-      this.logger.warn(`The cahe invalidate category List cahe`);
+      this.logger.debug(`The cahe invalidate category List cahe`);
     });
     return createdCategory;
   }

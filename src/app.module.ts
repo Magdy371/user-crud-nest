@@ -1,8 +1,9 @@
 /* eslint-disable prettier/prettier */
+import { PrismaModule } from './prisma/prisma.module';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { CategoryModule } from './category/category.module'
-import { PrismaModule } from './prisma/prisma.module';
+import { ProductModule } from './product/product.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware'
 import { AuthModule } from './auth/auth.module';
 import { GlobalExceptionFilter } from './common/filters/all-exceptions.filter';
@@ -13,7 +14,7 @@ import { CacheModule } from '@nestjs/cache-manager' //to enable in memory cache
 import { HttpCacheInterceptor } from './common/Interceptors/http-cache.interceptor';
 
 @Module({
-  imports: [UserModule, PrismaModule, AuthModule, CategoryModule, CacheModule.register(
+  imports: [UserModule, PrismaModule, AuthModule, CategoryModule, ProductModule, CacheModule.register(
     {
       isGlobal: true,
       ttl: Number(process.env.CACHE_TTL_DEFAULT ?? 60),

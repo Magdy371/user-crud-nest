@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="NEST JS Debug" type="NodeJSConfigurationType" singleton="false" path-to-js-file="dist/main.js" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>

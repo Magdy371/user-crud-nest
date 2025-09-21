@@ -1,12 +1,17 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { Category } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './DTOs/create.dto';
 import { UpdateCategoryDto } from './DTOs/update.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 export class CategoryService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(CategoryService.name);
+
+  constructor(private prisma: PrismaService,
+              @Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async create(data: CreateCategoryDto): Promise<Category> {
     const { name } = data;
@@ -18,9 +23,13 @@ export class CategoryService {
       throw new ConflictException('This category already exists');
     }
 
-    return this.prisma.category.create({
+    const createdCategory = await this.prisma.category.create({
       data,
     });
+    await this.cacheManager.del('GET:/categories').catch(() => {
+      this.logger.warn(`The cahe invalidate category List cahe`);
+    });
+    return createdCategory;
   }
 
   async findAll(): Promise<Category[]> {
@@ -44,29 +53,39 @@ export class CategoryService {
     return category;
   }
 
-  async update(id: number, data: UpdateCategoryDto): Promise<Category> { // Add return type
+  async update(id: number, data: UpdateCategoryDto): Promise<Category> {
     const categoryFound = await this.prisma.category.findUnique({
       where: { id },
     });
-
     if (!categoryFound) {
       throw new NotFoundException('The specified category not found');
     }
-
     if (data.name && data.name !== categoryFound.name) {
       const existingCategory = await this.prisma.category.findUnique({
         where: { name: data.name },
       });
-
       if (existingCategory) {
         throw new ConflictException('A category with this name already exists');
       }
     }
 
-    return this.prisma.category.update({
+    const updatedCategory =  this.prisma.category.update({
       where: { id },
-      data, // Use the data object, not the class reference
+      data,
     });
+    try {
+      await Promise.all([
+        this.cacheManager.del(`GET:/categories/${id}`),
+        this.cacheManager.del('GET:/categories'),
+      ]);
+      this.logger.debug(`Cache invalidated for category ${id} and categories list`);
+    } catch (error) {
+      this.logger.warn(
+        `Cache invalidation partially failed for category ${id}: ${error.message}`,
+        error.stack, // Include stack trace for better debugging
+      );
+    }
+    return updatedCategory;
   }
 
   async remove(id: number): Promise<Category> { // Add return type
@@ -86,8 +105,21 @@ export class CategoryService {
       throw new ConflictException('Cannot delete category with associated products');
     }
 
-    return this.prisma.category.delete({
+    const deletedCategory =  this.prisma.category.delete({
       where: { id },
     });
+    try {
+      await Promise.all([
+        this.cacheManager.del(`GET:/categories/${id}`),
+        this.cacheManager.del('GET:/categories'),
+      ]);
+      this.logger.debug(`Cache invalidated for category ${id} and categories list`);
+    } catch (error) {
+      this.logger.warn(
+        `Cache invalidation partially failed for category ${id}: ${error.message}`,
+        error.stack, // Include stack trace for better debugging
+      );
+    }
+    return deletedCategory;
   }
 }

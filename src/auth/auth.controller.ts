@@ -1,4 +1,5 @@
-import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Get, Request, ParseIntPipe, Param,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import type { LoginDto } from './DTOs/login.dto';
 import { AuthResponse } from './DTOs/authResponse.dto';
@@ -28,8 +29,8 @@ export class AuthController {
   async getProfile(@Request() req): Promise<User> {
     return req.user;
   }
-  @Post('logout')
-  async logout(): Promise<{ message: string }> {
-    return { message: 'Logged out successfully' };
+  @Post('logout/:id')
+  async logout(@Param('id',ParseIntPipe) id: number) {
+    return this.authService.logOut(id);
   }
 }

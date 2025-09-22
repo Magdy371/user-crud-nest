@@ -5,7 +5,6 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from  './DTOs/login.dto';
 import { AuthResponse } from './DTOs/authResponse.dto';
 import { RegisterDto} from './DTOs/register.dto';
-import { RefreshTokenDto } from './DTOs/ref_token.dto';
 import { User } from '@prisma/client';
 
 @Injectable()

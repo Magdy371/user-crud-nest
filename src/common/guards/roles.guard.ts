@@ -1,10 +1,6 @@
-/* eslint-disable prettier/prettier */
-/* eslint-disable prettier/prettier,@typescript-eslint/no-unsafe-assignment */
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Roles } from './decorators/auth.decorators';
 import { UserRole } from '@prisma/client';
-import { AuthGuard } from './auth.guard';
 import { ROLES_KEY } from './decorators/auth.decorators'
 
 
@@ -21,7 +17,6 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    //To superpass Guard order we use explicit calling
     // Get the request object
     const request = context.switchToHttp().getRequest();
     const user = request.user; // This should be set by your AuthGuard

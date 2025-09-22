@@ -13,13 +13,35 @@ export class UserService {
   async findAll(): Promise<User[]> {
     return this.prisma.user.findMany();
   }
-
   async findOne(id: number): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({where: { id },});
+    const user = await this.prisma.user.findUnique({ where: { id }, });
     if(!user){
        throw new NotFoundException(`User with id ${id} not found`)
     } 
     return user;
+  }
+
+  async findUserOrders(id: number){
+    const userWithOrders = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        orders: {
+          select: {
+            id: true, total: true, status: true,
+            orderItems: {
+              select: { product: { select: { name: true, price: true, }, },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!userWithOrders) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return userWithOrders.orders;
   }
 
   async update(id: number, dto: UpdateUser): Promise<User> {

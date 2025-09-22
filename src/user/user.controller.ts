@@ -23,6 +23,13 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Cachable()
+  @UserOnly()
+  @Get(':id/orders')
+  async findUserOrders(@Param('id',ParseIntPipe) id: number){
+    return this.userService.findUserOrders(id);
+  }
+
   @UserOnly()
   @Get(':id')
   async findOne(@Param('id',ParseIntPipe) id: number): Promise<User | null> {
@@ -41,11 +48,4 @@ export class UserController {
     return this.userService.remove(+id);
   }
 
-
-  @Get('Profile/:id')
-  @Cachable()
-  @AdminOnly()
-  async getProfile(@Param('id', ParseIntPipe) id: number){
-    return this.userService.findOne(id);
-  }
 }

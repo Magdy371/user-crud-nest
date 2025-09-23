@@ -76,9 +76,6 @@ export class OrderService {
   }
 
   async update(id: number, dto: UpdateOrderDto, userId:number, userRole: UserRole):  Promise<Order>{
-    //check user id if exist:
-    const user = await this.prisma.order.findUnique({ where: { id: userId }, },);
-    if(!user){ throw new NotFoundException('The User Not found');}
     //check for orderId
     const order = await this.prisma.order.findUnique({where:{id},},);
     if(!order){throw new NotFoundException('Specified Order Not found');}
@@ -97,8 +94,6 @@ export class OrderService {
   }
 
   async remove(id: number, userId:number, userRole: UserRole){
-    const user = await Promise.all([this.prisma.order.findUnique({ where: { id: userId }, },)]);
-    if(!user){ throw new NotFoundException('The User Not found');}
     //check for orderId
     const order = await this.prisma.order.findUnique({where:{id},},);
     if(!order){throw new NotFoundException('Specified Order Not found');}
@@ -120,8 +115,6 @@ export class OrderService {
   }
 
   async updateStatus(id: number, status: OrderStatus, userId: number, userRole: UserRole){
-    const user = await Promise.all([this.prisma.order.findUnique({ where: { id: userId }, },)]);
-    if(!user){ throw new NotFoundException('The User Not found');}
     //check for orderId
     const order = await this.prisma.order.findUnique({where:{id},},);
     if(!order){throw new NotFoundException('Specified Order Not found');}

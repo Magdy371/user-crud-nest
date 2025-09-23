@@ -29,6 +29,7 @@ export class AuthController {
   async getProfile(@Request() req): Promise<User> {
     return req.user;
   }
+
   @Post('logout/:id')
   async logout(@Param('id',ParseIntPipe) id: number) {
     return this.authService.logOut(id);

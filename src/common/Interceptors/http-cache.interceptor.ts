@@ -30,7 +30,7 @@ export class HttpCacheInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    // Check if route is cacheable
+    // Check if route is public
     const isPublic = this.reflector.getAllAndOverride(Public, [
       context.getHandler(),
       context.getClass(),

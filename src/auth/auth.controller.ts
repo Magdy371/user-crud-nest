@@ -3,7 +3,8 @@ import { Controller, Post, Body, Get, Request, ParseIntPipe, Param,
 import { AuthService } from './auth.service';
 import type { LoginDto } from './DTOs/login.dto';
 import { AuthResponse } from './DTOs/authResponse.dto';
-import { User } from '@prisma/client';
+import type { Response } from 'express';
+import { Res } from '@nestjs/common';
 import type { RegisterDto } from './DTOs/register.dto';
 import { Public } from '../common/guards/decorators/auth.decorators'
 import { Cachable } from '../common/guards/decorators/cacheable.decorator';
@@ -24,13 +25,17 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
-  @Cachable()
   @Get('profile')
-  async getProfile(@Request() req): Promise<User> {
-    return req.user;
+  async getProfile(@Request() req, @Res() res: Response) {
+    return res.json({
+      id: req.user.id,
+      name: req.user.name,
+      role: req.user.role,
+      email: req.user.email
+    });
   }
 
-  @Post('logout/:id')
+  @Post('logout')
   async logout(@Request() req) {
     return this.authService.logOut(req.user.id);
   }

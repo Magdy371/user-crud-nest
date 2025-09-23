@@ -60,7 +60,8 @@ export class HttpCacheInterceptor implements NestInterceptor {
     const userId = request.user?.id;
     const includeUser = Boolean(userId && explicitCachable);
     const cacheKeyBase = `${method}:${originalUrl}`;
-    const cacheKey = includeUser ? `${cacheKeyBase}:user:${userId}` : cacheKeyBase;
+    const cacheKey = includeUser ? `${cacheKeyBase}:user:${userId}` : cacheKeyBase
+    //const cacheKey = includeUser ? `${cacheKeyBase}:user:${userId}` : cacheKeyBase;
 
     return new Observable((subscriber) => {
       // Try to get cached response first

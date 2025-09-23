@@ -31,7 +31,7 @@ export class AuthController {
   }
 
   @Post('logout/:id')
-  async logout(@Param('id',ParseIntPipe) id: number) {
-    return this.authService.logOut(id);
+  async logout(@Request() req) {
+    return this.authService.logOut(req.user.id);
   }
 }

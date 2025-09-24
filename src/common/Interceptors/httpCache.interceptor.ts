@@ -58,7 +58,6 @@ export class HttpCacheInterceptor implements NestInterceptor {
     }catch (e) {
       this.logger.warn(`Cache get error for ${cacheKey}: ${e.message}`);
     }
-
     //if not cached then we cache it
     const response = await lastValueFrom(next.handle());
      try{

@@ -12,9 +12,6 @@ export class OrderService {
   }
   async create(userId: number, dto: CreateOrderDto): Promise<Order>{
     const { items } = dto;
-    //Check for User
-    const user = await this.prisma.user.findUnique({where:{id:userId},});
-
     //check for products needed in Order
     const productIds = items.map(item=>item.productId);
     const products = await this.prisma.product.findMany({where:{id:{in: productIds}}});

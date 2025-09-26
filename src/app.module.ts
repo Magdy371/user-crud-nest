@@ -4,6 +4,7 @@ import { RedisModule } from './redis/redis.module';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { CategoryModule } from './category/category.module'
+import { RoleModule } from './role/role.module';
 import { ProductModule } from './product/product.module';
 import { OrderModule } from './order/order.module'
 import { LoggerMiddleware } from './common/middlewares/logger.middleware'
@@ -16,7 +17,7 @@ import { CacheModule } from '@nestjs/cache-manager' //to enable in memory cache
 import { HttpCacheInterceptor } from './common/Interceptors/http-cache.interceptor';
 
 @Module({
-  imports: [UserModule, PrismaModule, AuthModule, CategoryModule, ProductModule, MongoModule, RedisModule, 
+  imports: [UserModule, PrismaModule, AuthModule, CategoryModule, ProductModule, MongoModule, RedisModule, RoleModule,
     OrderModule, CacheModule.register(
     {
       isGlobal: true,

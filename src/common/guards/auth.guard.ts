@@ -17,11 +17,7 @@ export class AuthGuard implements CanActivate {
   constructor(private jwtService: JwtService, private prisma: PrismaService, private reflector: Reflector) {
   }
   async canActivate(context:ExecutionContext): Promise<boolean> {
-    /**
-     * //This One is Used Only for Handler not class
-     *     const isPublic = this.reflector.get(IS_PUBLIC_KEY, context.getHandler());
-     * */
-    //This One for a Handler level 'Method()' or Class Level
+    
     const isPublic = this.reflector.getAllAndOverride(IS_PUBLIC_KEY,[context.getHandler(),context.getClass()]);
     if (isPublic) {
       return true; // If the route is public, bypass the guard
@@ -42,6 +38,7 @@ export class AuthGuard implements CanActivate {
         where: {
           id: payload.sub || payload.userId,
         },
+        include:{role:true}
       });
       if (!user) {
         throw new UnauthorizedException('user not found');

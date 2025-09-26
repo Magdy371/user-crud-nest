@@ -1,13 +1,12 @@
 import { Controller, Post, Body, Get, Request, ParseIntPipe, Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import type { LoginDto } from './DTOs/login.dto';
+import { LoginDto } from './DTOs/login.dto';
 import { AuthResponse } from './DTOs/authResponse.dto';
 import type { Response } from 'express';
 import { Res } from '@nestjs/common';
-import type { RegisterDto } from './DTOs/register.dto';
+import { RegisterDto } from './DTOs/register.dto';
 import { Public } from '../common/guards/decorators/auth.decorators'
-import { Cachable } from '../common/guards/decorators/cacheable.decorator';
 
 @Controller('auth')
 export class AuthController {

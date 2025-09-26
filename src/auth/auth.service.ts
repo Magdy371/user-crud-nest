@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -14,7 +14,7 @@ export class AuthService{
   async login(dto: LoginDto): Promise<AuthResponse>{
     // find User by email
     const {email, password} = dto;
-    const user =await this.prisma.user.findUnique({where :{email},});
+    const user =await this.prisma.user.findUnique({where :{email}, include:{role: true}});
     if(!user){
       throw new UnauthorizedException("Invalid Credentials");
     }
@@ -31,18 +31,50 @@ export class AuthService{
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.role.name
       },
     };
   }
+
   async register (dto: RegisterDto): Promise<AuthResponse> {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: dto.email }
+    });
+    if (existingUser) {
+      throw new ConflictException('User already exists');
+    }
+
+    let roleId: number;
+    if (dto.roleId) {
+      // Verify the specified role exists
+      const role = await this.prisma.role.findUnique({
+        where: { id: dto.roleId }
+      });
+      if (!role) {
+        throw new ConflictException('Specified role not found');
+      }
+      roleId = dto.roleId;
+    } else {
+      // Get default 'User' role
+      const userRole = await this.prisma.role.findUnique({
+        where: { name: 'User' }
+      });
+      if (!userRole) {
+        throw new ConflictException('Default User role not found');
+      }
+      roleId = userRole.id;
+    }
+
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
       data:{
         name: dto.name,
         email: dto.email,
         password: hashedPassword,
-        role: dto.role
+        roleId: roleId,
+      },
+      include: {
+        role: true, // Include role in response
       },
     });
     const tokens = await this.getTokens(user);
@@ -54,7 +86,7 @@ export class AuthService{
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.role.name
       },
     };
   }
@@ -72,22 +104,32 @@ export class AuthService{
 
   private async genereate_Token(user:User):Promise<string>{
     //Generate JWT TOKEN
+    const userWithRole = await this.prisma.user.findUnique({
+    where: { id: user.id },
+    include: { role: true },
+    });
     const payload = {
       sub: user.id,
       email: user.email,
-      role: user.role
+      role: userWithRole?.role.name
     };
     return this.jwtService.signAsync(payload,{
       secret:process.env.JWT_SECRET,
-      expiresIn:'2h'
+      expiresIn:'15m'
     });
   }
 
   private async genrateRef_token(user: User): Promise<string>{
+
+    const userWithRole = await this.prisma.user.findUnique({
+    where: { id: user.id },
+    include: { role: true },
+    });
+
     const payload = {
       sub: user.id,
       email: user.email,
-      role: user.role
+      role: userWithRole?.role.name
     };
     return this.jwtService.signAsync(payload,{
       secret:process.env.JWT_SECRET,

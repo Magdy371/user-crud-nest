@@ -14,7 +14,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         this.redisClient = new Redis({
             host: process.env.REDIS_HOST || 'localhost',
             port: Number(process.env.REDIS_PORT) || 6379,
-            password: process.env.REDIS_PASSWORD,
         });
         
     }
@@ -35,23 +34,37 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         }
     }
 
-    private async initLogConsumer() {
-         // Subscribe to logs channel for real-time processing
-        this.redisClient.subscribe(this.LOGS_CHANNEL,(err)=>{
-            if(err){
-                this.logger.error('Failed to subscribe to Redis channel', err);
-            }else {
-                this.logger.log(`Subscribed to Redis channel: ${this.LOGS_CHANNEL}`);
+    private async initLogConsumer(): Promise<void> { {
+    // Create a separate client for subscriptions
+        const subscribeClient = new Redis({
+            host: process.env.REDIS_HOST || 'localhost',
+            port: Number(process.env.REDIS_PORT) || 6379,
+        });
+
+        // Subscribe to logs channel for real-time processing
+        subscribeClient.subscribe(this.LOGS_CHANNEL, (err) => {
+            if (err) {
+                this.logger.error('Failed to subscribe to logs channel', err);
+            } else {
+                this.logger.log(`Subscribed to ${this.LOGS_CHANNEL} channel`);
             }
         });
-        //Process message from channel
-        this.redisClient.on('message',async(channel, message)=>{
-            if(channel === this.LOGS_CHANNEL){
+
+        // Process messages from channel
+        subscribeClient.on('message', async (channel, message) => {
+            if (channel === this.LOGS_CHANNEL) {
                 await this.processLogMessage(message);
             }
         });
-        //Process existing log in the queue
+
+        // Process existing logs in queue using main client (not in subscribe mode)
         await this.processLogQueue();
+
+        // Handle cleanup
+        subscribeClient.on('end', () => {
+            this.logger.log('Redis subscribe client disconnected');
+        });
+        }
     }
 
     private async processLogMessage(message: string){
@@ -67,15 +80,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     private async processLogQueue(): Promise<void> {
         try {
             let logMessage: string | null;
-            //Process to 100 log from the queue
-            for(let i=0; i<100; i++){
+            
+            // Process up to 100 logs from the queue
+            for (let i = 0; i < 100; i++) {
                 logMessage = await this.redisClient.rpop(this.LOGS_QUEUE);
-                if(!logMessage)
-                    break;
+                if (!logMessage) break;
+                
                 await this.processLogMessage(logMessage);
             }
         } catch (error) {
-            this.logger.error(`Failed to process log queue ${error.message}`);
+            this.logger.error('Failed to process log queue', error);
         }
     }
 }

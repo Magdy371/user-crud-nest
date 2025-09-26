@@ -1,5 +1,6 @@
-/* eslint-disable prettier/prettier */
 import { PrismaModule } from './prisma/prisma.module';
+import { MongoModule } from './DB/mongo.module';
+import { RedisModule } from './redis/redis.module';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { CategoryModule } from './category/category.module'
@@ -15,7 +16,8 @@ import { CacheModule } from '@nestjs/cache-manager' //to enable in memory cache
 import { HttpCacheInterceptor } from './common/Interceptors/http-cache.interceptor';
 
 @Module({
-  imports: [UserModule, PrismaModule, AuthModule, CategoryModule, ProductModule, OrderModule, CacheModule.register(
+  imports: [UserModule, PrismaModule, AuthModule, CategoryModule, ProductModule, MongoModule, RedisModule, 
+    OrderModule, CacheModule.register(
     {
       isGlobal: true,
       ttl: Number(process.env.CACHE_TTL_DEFAULT ?? 60),

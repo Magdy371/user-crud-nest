@@ -1,6 +1,5 @@
 /* eslint-disable prettier/prettier */
 import { IsEmail, IsOptional, MinLength } from 'class-validator';
-import { UserRole } from '@prisma/client';
 
 export class UpdateUser {
   @IsOptional()
@@ -9,7 +8,7 @@ export class UpdateUser {
 
   @IsOptional()
   @MinLength(4)
-  role?: UserRole;
+  roleId?: number;
 
   @IsOptional()
   password?: string;

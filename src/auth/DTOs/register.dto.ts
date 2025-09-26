@@ -1,8 +1,19 @@
-import { UserRole } from '@prisma/client';
+import { IsString, IsEmail, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 
-export interface RegisterDto{
+export class RegisterDto {
+  @IsString()
+  @IsNotEmpty()
   name: string;
+
+  @IsEmail()
+  @IsNotEmpty()
   email: string;
+
+  @IsString()
+  @IsNotEmpty()
   password: string;
-  role?: UserRole;
+
+  @IsNumber()
+  @IsOptional()
+  roleId?: number; // Changed from role to roleId
 }

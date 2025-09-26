@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './DTOs/create-order.dto';
 import { UpdateOrderDto } from './DTOs/update-order.dto';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
-import { Order, OrderStatus, Prisma, UserRole } from '@prisma/client';
+import { Order, OrderStatus, Prisma, } from '@prisma/client';
 
 @Injectable()
 export class OrderService {
@@ -45,9 +45,9 @@ export class OrderService {
     return order;
   }
 
-  async findAll(userId: number, userRole: UserRole): Promise<Order[]>{
+  async findAll(userId: number, userRole: string): Promise<Order[]>{
     // Admins can see all orders, users can only see their own
-    const where: Prisma.OrderWhereInput = userRole === UserRole.Admin ? {} : { userId };
+    const where: Prisma.OrderWhereInput = userRole === 'Admin' ? {} : { userId };
     return this.prisma.order.findMany({
       where,
       include:{
@@ -58,7 +58,7 @@ export class OrderService {
     });
   }
 
-  async findOne( id: number, userId: number, userRole: UserRole ){
+  async findOne( id: number, userId: number, userRole: string ){
     const order = await this.prisma.order.findUnique({
       where:{id},
       include:{
@@ -68,16 +68,16 @@ export class OrderService {
     });
     if(!order){throw new NotFoundException('Order not found')};
 
-    if (userRole !== UserRole.Admin && order.userId !== userId) {throw new ForbiddenException('You can only access your own orders');}
+    if (userRole !== 'Admin' && order.userId !== userId) {throw new ForbiddenException('You can only access your own orders');}
     return order;
   }
 
-  async update(id: number, dto: UpdateOrderDto, userId:number, userRole: UserRole):  Promise<Order>{
+  async update(id: number, dto: UpdateOrderDto, userId:number, userRole: string):  Promise<Order>{
     //check for orderId
     const order = await this.prisma.order.findUnique({where:{id},},);
     if(!order){throw new NotFoundException('Specified Order Not found');}
 
-    if(userRole!==UserRole.Admin && order.userId !== userId) { throw new ForbiddenException('You can only update your own orders');}
+    if(userRole!=='Admin' && order.userId !== userId) { throw new ForbiddenException('You can only update your own orders');}
     const updatedOrder = await this.prisma.order.update({
       where: { id },
       data:dto,
@@ -90,7 +90,7 @@ export class OrderService {
     return updatedOrder;
   }
 
-  async remove(id: number, userId:number, userRole: UserRole){
+  async remove(id: number, userId:number, userRole: string){
     //check for orderId
     const order = await this.prisma.order.findUnique({where:{id},},);
     if(!order){throw new NotFoundException('Specified Order Not found');}
@@ -111,7 +111,7 @@ export class OrderService {
     return deletedOrder;
   }
 
-  async updateStatus(id: number, status: OrderStatus, userId: number, userRole: UserRole){
+  async updateStatus(id: number, status: OrderStatus, userId: number, userRole: string){
     //check for orderId
     const order = await this.prisma.order.findUnique({where:{id},},);
     if(!order){throw new NotFoundException('Specified Order Not found');}

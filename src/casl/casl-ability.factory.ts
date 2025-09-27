@@ -39,6 +39,7 @@ export class CaslAbilityFactory {
       can('delete', 'Order', { userId: user.id });
     }
 
+    //detrmine "subject" of permission check
     return build({
       detectSubjectType: (item) =>
         item.constructor.name as ExtractSubjectType<AppSubjects>,

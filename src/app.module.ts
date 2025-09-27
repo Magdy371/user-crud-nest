@@ -11,14 +11,16 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware'
 import { AuthModule } from './auth/auth.module';
 import { GlobalExceptionFilter } from './common/filters/all-exceptions.filter';
 import { AuthGuard } from './common/guards/auth.guard';
-import { RolesGuard} from './common/guards/roles.guard';
+//import { RolesGuard} from './common/guards/roles.guard';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { CacheModule } from '@nestjs/cache-manager' //to enable in memory cache
 import { HttpCacheInterceptor } from './common/Interceptors/http-cache.interceptor';
+import { CaslModule } from './casl/casl.module';
+import { CaslGuard } from './common/guards/casl.guard';
 
 @Module({
   imports: [UserModule, PrismaModule, AuthModule, CategoryModule, ProductModule, MongoModule, RedisModule, RoleModule,
-    OrderModule, CacheModule.register(
+    OrderModule,CaslModule, CacheModule.register(
     {
       isGlobal: true,
       ttl: Number(process.env.CACHE_TTL_DEFAULT ?? 60),
@@ -31,8 +33,13 @@ import { HttpCacheInterceptor } from './common/Interceptors/http-cache.intercept
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: CaslGuard, // Add to guard for authorization
     },
+    /*
+    * {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },**/
    {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter, // Global exception filter

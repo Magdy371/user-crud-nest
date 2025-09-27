@@ -2,16 +2,14 @@ import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe } from "@
 import { RoleService } from "./role.service";
 import { CreateRoleDto } from "./DTOs/create-role.dto";
 import { UpdateRoleDto } from "./DTOs/update-role.dto";
-import {
-  AdminOnly,
-  Public,
-} from 'src/common/guards/decorators/auth.decorators';
+import {CanManage,Public,CanRead,CanUpdate, CanDelete} from '../common/guards/decorators/casl.decorator';
 import { Cachable } from "src/common/guards/decorators/cacheable.decorator";
 
 @Controller('roles')
 export class RoleController {
     constructor(private readonly roleService: RoleService) {}
 
+    @CanManage('Role')
     @Public()
     @Post()
     create(@Body() data: CreateRoleDto) {
@@ -25,26 +23,26 @@ export class RoleController {
         return this.roleService.findAll();
     }
 
-    @AdminOnly()
+    @CanRead('Role')
     @Get(':id')
     @Cachable({ ttl: 3600 }) // Cache for 1 hour
     findOne(@Param('id', ParseIntPipe) id: number){
         return this.roleService.findOne(id);
     }
 
-    @AdminOnly()
+    @CanRead('Role')
     @Get(':name')
     findOneByName(@Param('name') name: string){
         return this.roleService.findByname(name);
     }
 
-    @AdminOnly()
+    @CanUpdate('Role')
     @Put(':id')
     update(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateRoleDto){
         return this.roleService.update(id, data);
     }
 
-    @AdminOnly()
+    @CanDelete('Role')
     @Delete(':id')
     delete(@Param('id', ParseIntPipe) id: number){
         return this.roleService.remove(id);

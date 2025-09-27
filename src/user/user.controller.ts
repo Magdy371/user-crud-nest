@@ -4,10 +4,10 @@ import { UserService } from './user.service';
 import { UpdateUser } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { ParseIntPipe } from '@nestjs/common';
-import { UserOnly, AdminOnly, Public } from '../common/guards/decorators/auth.decorators'
+import { UserOnly,} from '../common/guards/decorators/auth.decorators'
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Cachable } from '../common/guards/decorators/cacheable.decorator';
-
+import { CanDelete, CanManage, CanRead, CanUpdate } from 'src/common/guards/decorators/casl.decorator';
 
 @Controller('users')
 @UseGuards(RolesGuard) // Apply roles guard to all routes in this controller// plural is conventional
@@ -16,15 +16,14 @@ export class UserController {
 
   //@UseGuards(new AuthGuard)
   //we will use guard on user Modules insted to be applied on the controllers of user Modules
-
-  @Public()
+  @CanManage('User')
   @Get()
   async findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
+  @CanRead('User')
   @Cachable()
-  @UserOnly()
   @Get(':id/orders')
   async findUserOrders(@Param('id',ParseIntPipe) id: number){
     return this.userService.findUserOrders(id);
@@ -36,14 +35,14 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
+  @CanUpdate('User')
   @Put(':id')
-  @AdminOnly()
   async update(@Param('id',ParseIntPipe) id: number, @Body() data: UpdateUser): Promise<User> {
     return this.userService.update(id, data);
   }
 
+  @CanDelete('User')
   @Delete(':id')
-  @AdminOnly()
   async delete(@Param('id',ParseIntPipe) id: number): Promise<User> {
     return this.userService.remove(+id);
   }

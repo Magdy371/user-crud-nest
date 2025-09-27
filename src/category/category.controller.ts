@@ -5,6 +5,7 @@ import { UpdateCategoryDto } from './DTOs/update.dto';
 import { ParseIntPipe } from '@nestjs/common';
 import { AdminOnly, Public } from '../common/guards/decorators/auth.decorators'
 import { Cachable } from '../common/guards/decorators/cacheable.decorator';
+import { CanCreate, CanDelete, CanUpdate } from 'src/common/guards/decorators/casl.decorator';
 
 
 @Controller('categories')
@@ -13,7 +14,7 @@ export class CategoryController {
   constructor(private service: CategoryService) {
   }
 
-  @AdminOnly()
+  @CanCreate('Category')
   @Post()
   async create(@Body() dto: CreateCategoryDto){
     return this.service.create(dto);
@@ -33,13 +34,13 @@ export class CategoryController {
     return this.service.findOne(id);
   }
 
-  @AdminOnly()
+  @CanUpdate('Category')
   @Put(':id')
   async update(@Param('id', ParseIntPipe) id: number,@Body() dto: UpdateCategoryDto){
     return this.service.update(id,dto);
   }
 
-  @AdminOnly()
+  @CanDelete('Category')
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number){
     return this.service.remove(id);

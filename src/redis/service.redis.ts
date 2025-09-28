@@ -17,7 +17,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     }
 
     async onModuleInit() {
-        setInterval(() => this.processLogQueue(), 5000);
+        setInterval(() => this.processLogQueue(), 10000);
         await this.processLogQueue();
         this.logger.log('Redis service initialized with log consumer');
     }

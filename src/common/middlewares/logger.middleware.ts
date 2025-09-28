@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { RedisService } from 'src/redis/redis.service';
+import { RedisService } from 'src/redis/service.redis';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {

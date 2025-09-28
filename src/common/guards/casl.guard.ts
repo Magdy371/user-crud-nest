@@ -36,6 +36,7 @@ export class CaslGuard implements CanActivate {
       throw new ForbiddenException('User not authenticated');
     }
 
+    //to create a new ability object for the authenticated user, which contains all their defined permissions.
     const ability = this.abilityFactory.createForUser(user);
 
     // If no specific permissions required, just check if user is authenticated
@@ -43,6 +44,8 @@ export class CaslGuard implements CanActivate {
       return true;
     }
 
+    //It iterates through all the requiredPermissions and calls the handle() 
+    // method on each one, passing the user's ability object.
     const hasPermission = requiredPermissions.every((permission) =>
       permission.handle(ability)
     );

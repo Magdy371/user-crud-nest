@@ -17,7 +17,7 @@ export type AppAbility = PureAbility<[string, AppSubjects], PrismaQuery>;
 @Injectable()
 export class CaslAbilityFactory {
   createForUser(user: User & { role: { name: string } }) {
-    const { can, cannot, build } = new AbilityBuilder<AppAbility>(createPrismaAbility);
+    const { can, build } = new AbilityBuilder<AppAbility>(createPrismaAbility);
 
     if (user.role.name === 'Admin') {
       // Admin can manage everything

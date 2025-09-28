@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { InjectModel, MongooseModule } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Log, LogSchema } from './schemas/log.schema';
+import { Log } from './schemas/log.schema';
 
 @Injectable()
 export class MongoService implements OnModuleInit, OnModuleDestroy {

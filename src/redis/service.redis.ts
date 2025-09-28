@@ -17,6 +17,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     }
 
     async onModuleInit() {
+        setInterval(() => this.processLogQueue(), 5000);
         await this.processLogQueue();
         this.logger.log('Redis service initialized with log consumer');
     }
@@ -33,17 +34,34 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         }
     }
 
+    // private async processLogQueue(): Promise<void> {
+    //     try {
+    //         while (true) {
+    //             const result = await this.redisClient.brpop(this.LOGS_QUEUE, 0);
+                
+    //             if (result) {
+    //                 const logData = JSON.parse(result[1]);
+    //                 await this.service.createLog(logData);
+    //                 this.logger.debug('Log saved to MongoDB via Redis Queue');
+    //             }
+    //         }
+    //     } catch (error) {
+    //         this.logger.error('Failed to process log queue', error);
+    //     }
+    // }
+
     private async processLogQueue(): Promise<void> {
         try {
-            while (true) {
-                const result = await this.redisClient.brpop(this.LOGS_QUEUE, 0);
+            let logMessage: string | null;
+            
+            // Process up to 100 logs from the queue
+            for (let i = 0; i < 100; i++) {
+                logMessage = await this.redisClient.rpop(this.LOGS_QUEUE);
+                if (!logMessage) break;
                 
-                if (result) {
-                    // result[0] = key name, result[1] = actual value
-                    const logData = JSON.parse(result[1]);
-                    await this.service.createLog(logData);
-                    this.logger.debug('Log saved to MongoDB via Redis Queue');
-                }
+                const logData = JSON.parse(logMessage);  // Fixed variable name
+                await this.service.createLog(logData);
+                this.logger.debug('Log saved to MongoDB via Redis');
             }
         } catch (error) {
             this.logger.error('Failed to process log queue', error);

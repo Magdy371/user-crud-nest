@@ -1,10 +1,10 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { CaslAbilityFactory } from 'src/casl/casl-ability.factory';
+import { AppAbility, CaslAbilityFactory } from 'src/casl/casl-ability.factory';
 import { RequiredPermission, CHECK_PERMISSIONS_KEY, IS_PUBLIC_KEY } from './decorators/casl.decorator';
 
 export interface IPermissionHandler {
-  handle(ability: any): boolean;
+  handle(ability: AppAbility): boolean;
 }
 
 @Injectable()

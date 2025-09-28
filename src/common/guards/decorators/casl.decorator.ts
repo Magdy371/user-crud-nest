@@ -35,6 +35,3 @@ export const CanManage = (subject: string) =>
 // Role-based shortcut decorators
 export const AdminOnly = () => 
   CheckPermissions(CreatePermission('manage', 'all'));
-
-export const UserOnly = () => 
-  CheckPermissions(CreatePermission('read', 'User'));
